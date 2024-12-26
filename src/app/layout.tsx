@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter"
 import { ThemeProvider } from "@mui/material"
-import { Padauk, Roboto } from "next/font/google"
+import { Roboto } from "next/font/google"
 import theme from "./theme"
 
 

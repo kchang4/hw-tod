@@ -1,6 +1,6 @@
 'use client'
 
-import { LineChart, LineChartProps, ScatterChart } from "@mui/x-charts"
+import { LineChart, LineChartProps } from "@mui/x-charts"
 import { Nations, Tod } from "./types"
 import { useState } from "react"
 import dayjs from "dayjs"
@@ -51,7 +51,8 @@ const getGraphData = (tods: Tod[], xAxis: Date[]) => {
             data[nation].data![key] = 0
         }
 
-        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         data[nation].data![key] += 1
     }
 
@@ -75,21 +76,9 @@ function getXAxisData(tods: Tod[]) {
 }
 
 export default function TodGraph(props: TodGraphProps) {
-    const [graphData, setGraphData] = useState<LineChartProps["series"]>(getGraphData(props.tods, getXAxisData(props.tods)))
-    const [xAxisData, setXAxisData] = useState<Date[]>(getXAxisData(props.tods))
+    const [graphData] = useState<LineChartProps["series"]>(getGraphData(props.tods, getXAxisData(props.tods)))
+    const [xAxisData] = useState<Date[]>(getXAxisData(props.tods))
 
-    const refreshData = async () => {
-        if (!props.onRefresh) {
-            return;
-        }
-
-        const newTods = await props.onRefresh()
-        const xAxisData = getXAxisData(newTods)
-        setXAxisData(xAxisData)
-
-        const graphData = getGraphData(newTods, xAxisData)
-        setGraphData(graphData)
-    }
 
     return (
         <LineChart

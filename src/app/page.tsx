@@ -5,6 +5,7 @@ import SideMenu from "./side-menu"
 
 export default async function Home() {
   // grab tods from the last 6hrs
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const tods = await fetchTods()
 
   return (
