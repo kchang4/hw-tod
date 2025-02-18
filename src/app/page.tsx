@@ -1,23 +1,29 @@
-import { fetchTods } from "./actions"
 import { Box, Stack } from "@mui/material"
 import { Suspense } from "react"
 import SideMenu from "./side-menu"
+import TodList from "./tod-list"
+import { SessionProvider } from "next-auth/react"
+import TopNavBar from "./components/top-navbar"
+import { TimeSettingsProvider } from "./contexts/time-settings.context"
 
-export default async function Home() {
-  // grab tods from the last 6hrs
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const tods = await fetchTods()
+export default function Home() {
 
   return (
-    <Box sx={{ height: '100%', width: '100%' }}>
-      <Stack direction="row" spacing={2} sx={{ height: '100%', width: '100%' }}>
-        <SideMenu />
-        <Box>
-          <Suspense fallback="Loading TODs...">
-            Hello...
-          </Suspense>
-        </Box>
-      </Stack >
-    </Box >
+    <TimeSettingsProvider>
+      <SessionProvider>
+        <Box sx={{ height: '100%', width: '100%' }}>
+          <TopNavBar />
+          <Stack direction="row" spacing={2} sx={{ height: '100%', width: '100%' }}>
+            <SideMenu />
+            <Box flexGrow={1}>
+              <Suspense fallback="Loading TODs...">
+                <TodList />
+              </Suspense>
+            </Box>
+          </Stack >
+        </Box >
+      </SessionProvider>
+    </TimeSettingsProvider>
+
   )
 }

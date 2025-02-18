@@ -1,154 +1,60 @@
-import * as dayjs from 'dayjs';
-import { Nations, Tod } from './types';
+import { Nations, Tod, TodRaw } from './types';
+import { sql } from '@vercel/postgres';
 
 export async function fetchTods() {
-    return await fetchMockedTodos();
+    // grab tods from last 6 hours
+    const tods = await sql`
+            SELECT CAST(EXTRACT(EPOCH FROM rounded_timestamp) * 1000 AS BIGINT) AS tod_timestamp, COUNT(rounded_timestamp) as count, nation
+        FROM(
+            SELECT DATE_TRUNC('minute', TO_TIMESTAMP(tod_timestamp / 1000)) AS rounded_timestamp, nation
+                FROM tods
+        ) AS rounded_query
+            WHERE rounded_timestamp >= NOW() - INTERVAL '6 hours'
+            GROUP BY rounded_timestamp, nation
+            ORDER BY nation ASC, count DESC, rounded_timestamp ASC`
+
+    return tods.rows
 }
 
-async function fetchMockedTodos() {
-    const mockedTods: Tod[] = [
-        // {
-        //     id: generateUUID(),
-        //     timestamp: dayjs.default().subtract(120, 'minute').toDate(),
-        //     nation: Nations.Sandoria,
-        // },
-        // {
-        //     id: generateUUID(),
-        //     timestamp: dayjs.default().subtract(180, 'minute').toDate(),
-        //     nation: Nations.Windurst,
-        // },
-        // {
-        //     id: generateUUID(),
-        //     timestamp: dayjs.default().add(30, 'minute').toDate(),
-        //     nation: Nations.Bastok,
-        // },
-        {
-            id: generateUUID(),
-            timestamp: dayjs.default().subtract(30, 'minute').toDate(),
-            nation: Nations.Kazham,
-        },
-        {
-            id: generateUUID(),
-            timestamp: dayjs.default().subtract(30, 'minute').toDate(),
-            nation: Nations.Kazham,
-        },
-        {
-            id: generateUUID(),
-            timestamp: dayjs.default().subtract(30, 'minute').toDate(),
-            nation: Nations.Kazham,
-        },
-        {
-            id: generateUUID(),
-            timestamp: dayjs.default().subtract(30, 'minute').toDate(),
-            nation: Nations.Kazham,
-        },
-        {
-            id: generateUUID(),
-            timestamp: dayjs.default().subtract(30, 'minute').toDate(),
-            nation: Nations.Kazham,
-        },
-        {
-            id: generateUUID(),
-            timestamp: dayjs.default().subtract(30, 'minute').add(5, 'second').toDate(),
-            nation: Nations.Kazham,
-        },
-        {
-            id: generateUUID(),
-            timestamp: dayjs.default().subtract(30, 'minute').add(5, 'second').toDate(),
-            nation: Nations.Kazham,
-        },
-        {
-            id: generateUUID(),
-            timestamp: dayjs.default().subtract(30, 'minute').add(5, 'second').toDate(),
-            nation: Nations.Kazham,
-        },
-        {
-            id: generateUUID(),
-            timestamp: dayjs.default().subtract(30, 'minute').subtract(5, 'second').toDate(),
-            nation: Nations.Kazham,
-        },
-        {
-            id: generateUUID(),
-            timestamp: dayjs.default().subtract(30, 'minute').subtract(5, 'second').toDate(),
-            nation: Nations.Kazham,
-        },
-        {
-            id: generateUUID(),
-            timestamp: dayjs.default().subtract(30, 'minute').subtract(5, 'second').toDate(),
-            nation: Nations.Kazham,
-        },
-        {
-            id: generateUUID(),
-            timestamp: dayjs.default().subtract(30, 'minute').subtract(5, 'second').toDate(),
-            nation: Nations.Kazham,
-        },
-        {
-            id: generateUUID(),
-            timestamp: dayjs.default().subtract(30, 'minute').subtract(5, 'second').toDate(),
-            nation: Nations.Kazham,
-        },
-        {
-            id: generateUUID(),
-            timestamp: dayjs.default().subtract(30, 'minute').subtract(6, 'second').toDate(),
-            nation: Nations.Kazham,
-        },
-        {
-            id: generateUUID(),
-            timestamp: dayjs.default().subtract(30, 'minute').subtract(6, 'second').toDate(),
-            nation: Nations.Kazham,
-        },
-        {
-            id: generateUUID(),
-            timestamp: dayjs.default().subtract(30, 'minute').subtract(7, 'second').toDate(),
-            nation: Nations.Kazham,
-        },
-        {
-            id: generateUUID(),
-            timestamp: dayjs.default().subtract(30, 'minute').subtract(7, 'second').toDate(),
-            nation: Nations.Kazham,
-        }
-    ]
+export async function fetchTod(nation: Nations) {
+    const tods = await sql`
+    SELECT CAST(EXTRACT(EPOCH FROM rounded_timestamp) * 1000 AS BIGINT) AS tod_timestamp, COUNT(rounded_timestamp) as count, nation
+FROM(
+    SELECT DATE_TRUNC('minute', TO_TIMESTAMP(tod_timestamp / 1000)) AS rounded_timestamp, nation
+        FROM tods
+) AS rounded_query
+    WHERE rounded_timestamp >= NOW() - INTERVAL '6 hours' AND nation = ${nation}
+    GROUP BY rounded_timestamp, nation
+    ORDER BY nation ASC, count DESC, rounded_timestamp ASC`
 
-    // Simulate network latency
-    return new Promise<Tod[]>((resolve) => {
-        setTimeout(() => {
-            resolve(mockedTods)
-        }, Math.random() * (5000 - 1000) + 1000);
-    });
+    return tods.rows[0]
 }
 
-export async function createTod(tod: dayjs.Dayjs, nation: Nations) {
-    // Save the TOD to the server
-    // await fetch('/api/tod', {
-    //     method: 'POST',
-    //     body: JSON.stringify({
-    //         timestamp: tod.toDate(),
-    //         nation,
-    //     }),
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //     },
-    // });
 
-    // Simulate network latency
-    return new Promise<Tod>((resolve) => {
-        setTimeout(() => {
-            resolve({
-                id: generateUUID(),
-                timestamp: tod.toDate(),
-                nation,
-            })
-        }, Math.random() * (5000 - 1000) + 1000)
-    })
+export async function createTod(timestamp: Date, nation: Nations, userEmail: string) {
+    console.log(`here is the timestamp: ${timestamp}`)
+    // Check if user has already submitted a TOD in the last 4 hours
+    const existingTod = await sql<TodRaw>`SELECT * FROM tods WHERE nation = ${nation} AND created_by = ${userEmail} AND tod_timestamp >= ${timestamp.getTime()} - 14400000`
+    if (existingTod.rows.length > 0) {
+        console.log(`found 1: ${timestamp}`)
+        throw new Error(`You have already submitted a TOD for ${nation} within the past 4 hours!`)
+    }
+
+    console.log(`creating...: ${timestamp}`)
+
+    // Insert the new TOD
+    const newTod = await sql<TodRaw>`
+        INSERT INTO tods (tod_timestamp, nation, created_by, created_on) 
+        VALUES (${timestamp.getTime()}, ${nation}, ${userEmail}, ${new Date().getTime()}) 
+        RETURNING id, tod_timestamp, nation, created_by, created_on`
+    return new Tod(newTod.rows[0])
 }
 
-function generateUUID(): string {
-    // Generate 4 random hexadecimal digits for each part of the UUID
-    const part1 = (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-    const part2 = (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-    const part3 = (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-    const part4 = (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-
-    // Construct the UUID string
-    return `${part1}${part2}-${part3}-${part4}-${part1}${part2}`;
-}
+// export async function updateTod(id: string, updates: Partial<TodRaw>, userEmail?: string) {
+//     // Update the TOD on the server
+//     const updatedTod = await sql<TodRaw>`
+//         UPDATE tods SET ${Object.keys(updates).join(", ")}, modified_by = ${userEmail || ""}, modified_on = NOW() 
+//         WHERE id = ${id} 
+//         RETURNING id, timestamp, nation, created_by, created_on, modified_by, modified_on`;
+//     return new Tod(updatedTod.rows[0])
+// }

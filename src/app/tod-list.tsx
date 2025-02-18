@@ -1,14 +1,17 @@
 "use client"
 
-import { Tod } from "./types"
+import { Box } from "@mui/material"
+import { Nations } from "./types"
+import TodCard from "./components/tod-card"
 
-export interface TodListProps {
-    tods: Tod[]
-}
+export default function TodList() {
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function TodList(props: TodListProps) {
     return (
-        <></>
+        <Box sx={(theme) => ({ padding: theme.spacing(2) })}>
+            <TodCard nation={Nations.Bastok} />
+            <TodCard nation={Nations.Kazham} />
+            <TodCard nation={Nations.Sandoria} />
+            <TodCard nation={Nations.Windurst} />
+        </Box>
     )
 }

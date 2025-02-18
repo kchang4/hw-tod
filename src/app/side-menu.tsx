@@ -1,85 +1,86 @@
-'use client'
+"use client"
 
-import { Box, Button, Divider, List, ListItem, ListItemIcon, ListSubheader } from "@mui/material"
-import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers"
+import { Alert, Box, Divider, List, Snackbar } from "@mui/material"
+import { LocalizationProvider } from "@mui/x-date-pickers"
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs"
 import dayjs from "dayjs"
-import Image from "next/image"
-import { useEffect, useRef, useState } from "react"
-import { createTod } from "./actions"
-import { Nations } from "./types"
+import { useState } from "react"
+import { Nations, TodRaw } from "./types"
+import { useSession } from "next-auth/react"
+import { useTimeSettings } from "./contexts/time-settings.context"
+import SideMenuItem from "./components/side-menu-item"
+import { time } from "console"
 
 export default function SideMenu() {
-    const timerRef = useRef<NodeJS.Timeout | null>(null)
-    const [currentTime, setCurrentTime] = useState(dayjs())
+    const { data: session } = useSession()
+    const { timeFormat } = useTimeSettings()
 
-    const updateCurrentTime = (value: dayjs.Dayjs | null) => {
-        if (value) {
-            clearTimer()
-            setCurrentTime(value)
+    const [saving, setSaving] = useState(false)
+    const [error, setError] = useState<Error | null>(null)
+    const [notificationMessage, setNotificationMessage] = useState('')
+
+    const TIME_FORMAT = timeFormat === "24" ? "YYYY/MM/DD HH:mm:ss" : "YYYY/MM/DD hh:mm:ss A"
+
+    const saveTod = async (nation: Nations, tod: number) => {
+        setNotificationMessage("")
+        setError(null)
+
+        if (!session) {
+            const errorMessage = 'You must be logged in to submit a TOD!'
+            setNotificationMessage(errorMessage)
+            setError(new Error(errorMessage))
+            return
+        }
+
+        const timestamp = dayjs(tod);
+        timestamp.startOf("second")
+
+        try {
+            setSaving(true)
+            const response = await fetch("/api/tod", { method: "POST", body: JSON.stringify({ timestamp: timestamp.valueOf(), nation }) })
+            if (!response.ok) {
+                const message = await response.text()
+                throw new Error(message)
+            }
+            const createdTod = await response.json() as TodRaw
+            setNotificationMessage(`${dayjs(createdTod.tod_timestamp).format(TIME_FORMAT)} submitted for ${nation}!`)
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(err)
+                setNotificationMessage(err.message)
+            }
+        } finally {
+            setSaving(false)
         }
     }
-
-    const updateTimer = () => {
-        timerRef.current = setInterval(() => {
-            setCurrentTime(dayjs())
-        }, 50)
-    }
-
-    const clearTimer = () => {
-        if (timerRef.current) {
-            clearInterval(timerRef.current)
-        }
-    }
-
-    const saveTod = async (nation: Nations) => {
-        const newTod = await createTod(currentTime, nation)
-        console.log(newTod)
-    }
-
-    useEffect(() => {
-        updateTimer()
-
-        return () => clearTimer()
-    }, [])
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Box sx={{ width: 420, borderRight: '1px solid rgba(0, 0, 0, .1)', boxShadow: '0 0 5px 0 rgba(0, 0, 0, .3)' }}>
-                <List subheader={<ListSubheader>Submit Highwind TODs Here</ListSubheader>}>
-                    <ListItem
-                        sx={{ backgroundImage: 'linear-gradient(to right, rgba(0, 0, 255, .1), white)' }}
-                        secondaryAction={<Button variant="contained" color="primary" onClick={() => saveTod(Nations.Bastok)}>Submit</Button>}
-                    >
-                        <ListItemIcon><Image src="/bastok.webp" width={30} height={30} alt="Bastok" /></ListItemIcon>
-                        <DateTimePicker slotProps={{ textField: { onFocus: () => clearTimer() } }} onChange={updateCurrentTime} ampm={false} sx={{ width: 220 }} label="Bastok Highwind TOD" value={currentTime} views={["year", "month", "day", "hours", "minutes", "seconds"]} />
-                    </ListItem>
+            <Box sx={{ width: 380, borderRight: 1, borderColor: 'divider' }}>
+                <List>
+                    <SideMenuItem disabled={saving || !session} nation={Nations.Bastok} onSave={saveTod} />
                     <Divider component="li" variant="middle" />
-                    <ListItem
-                        sx={{ backgroundImage: 'linear-gradient(to right, rgba(128, 0, 128, .1), white)' }}
-                        secondaryAction={<Button variant="contained" color="primary" onClick={() => saveTod(Nations.Kazham)}>Submit</Button>}
-                    >
-                        <ListItemIcon><Image src="/kazham.webp" width={30} height={30} alt="Kazham" /></ListItemIcon>
-                        <DateTimePicker slotProps={{ textField: { onFocus: () => clearTimer() } }} onChange={updateCurrentTime} ampm={false} sx={{ width: 220 }} label="Kazham Highwind TOD" value={currentTime} views={["year", "month", "day", "hours", "minutes", "seconds"]} />
-                    </ListItem>
+                    <SideMenuItem disabled={saving || !session} nation={Nations.Kazham} onSave={saveTod} />
                     <Divider component="li" variant="middle" />
-                    <ListItem
-                        sx={{ backgroundImage: 'linear-gradient(to right, rgba(255, 0, 0, .1), white)' }}
-                        secondaryAction={<Button variant="contained" color="primary" onClick={() => saveTod(Nations.Sandoria)}>Submit</Button>}
-                    >
-                        <ListItemIcon><Image src="/sandoria.webp" width={30} height={30} alt="San d'Oria" /></ListItemIcon>
-                        <DateTimePicker slotProps={{ textField: { onFocus: () => clearTimer() } }} onChange={updateCurrentTime} ampm={false} sx={{ width: 220 }} label="San d'Oria Highwind TOD" value={currentTime} views={["year", "month", "day", "hours", "minutes", "seconds"]} />
-                    </ListItem>
+                    <SideMenuItem disabled={saving || !session} nation={Nations.Sandoria} onSave={saveTod} />
                     <Divider component="li" variant="middle" />
-                    <ListItem
-                        sx={{ backgroundImage: 'linear-gradient(to right, rgba(0, 255, 0, .1), white)' }}
-                        secondaryAction={<Button variant="contained" color="primary" onClick={() => saveTod(Nations.Windurst)}>Submit</Button>}
-                    >
-                        <ListItemIcon><Image src="/windurst.webp" width={30} height={30} alt="Windurst" /></ListItemIcon>
-                        <DateTimePicker slotProps={{ textField: { onFocus: () => clearTimer() } }} onChange={updateCurrentTime} ampm={false} sx={{ width: 220 }} label="Windurst Highwind TOD" value={currentTime} views={["year", "month", "day", "hours", "minutes", "seconds"]} />
-                    </ListItem>
+                    <SideMenuItem disabled={saving || !session} nation={Nations.Windurst} onSave={saveTod} />
                 </List>
+                {!session &&
+                    <Box sx={(theme) => ({ paddingLeft: theme.spacing(2), paddingRight: theme.spacing(2) })}>
+                        <Alert severity="warning">You must be logged in to submit TODs</Alert>
+                    </Box>
+                }
+
             </Box >
+            <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={!!notificationMessage.length}
+                autoHideDuration={3000}
+                onClose={() => setNotificationMessage('')}
+            >
+                <Alert severity={error ? "error" : "success"}>{notificationMessage}</Alert>
+            </Snackbar>
         </LocalizationProvider >
     )
 }
