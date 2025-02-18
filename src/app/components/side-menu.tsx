@@ -5,10 +5,10 @@ import { LocalizationProvider } from "@mui/x-date-pickers"
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs"
 import dayjs from "dayjs"
 import { useState } from "react"
-import { Nations, TodRaw } from "./types"
+import { Nations, TodRaw } from "../types"
 import { useSession } from "next-auth/react"
-import { useTimeSettings } from "./contexts/time-settings.context"
-import SideMenuItem from "./components/side-menu-item"
+import { useTimeSettings } from "../contexts/time-settings.context"
+import SideMenuItem from "./side-menu-item"
 
 export default function SideMenu() {
     const { data: session } = useSession()

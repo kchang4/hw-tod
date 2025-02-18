@@ -1,6 +1,6 @@
 import { Box, Stack } from "@mui/material"
 import { Suspense } from "react"
-import SideMenu from "./side-menu"
+import SideMenu from "./components/side-menu"
 import TodList from "./tod-list"
 import { SessionProvider } from "next-auth/react"
 import TopNavBar from "./components/top-navbar"

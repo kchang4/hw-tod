@@ -123,8 +123,8 @@ export default function TodCard({ nation }: TodBarProps) {
                     <List dense>
                         {tods.map((tod, index) => {
                             const todInt = parseInt(tod.tod_timestamp)
-                            const popTime = <Typography variant="subtitle1">{dayjs(todInt).add(4, "hours").format(TIME_FORMAT)}</Typography>
-                            const todTime = <Typography sx={{ color: "rgba(0, 0, 0, .5)" }} variant="subtitle2">TOD : {dayjs(todInt).format(TIME_FORMAT)}</Typography>
+                            const popTime = <Typography variant="subtitle1">POP: {dayjs(todInt).add(4, "hours").format(TIME_FORMAT)}</Typography>
+                            const todTime = <Typography sx={{ color: "rgba(0, 0, 0, .5)" }} variant="subtitle2">TOD: {dayjs(todInt).format(TIME_FORMAT)}</Typography>
                             const secondaryAction = <ListItemIcon><Tooltip title="Number of Reports"><Badge badgeContent={tod.tod_count} color="primary"></Badge></Tooltip></ListItemIcon>
                             return (
                                 <Box key={`${nation}${index}${tod.tod_timestamp}`}>
