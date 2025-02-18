@@ -64,10 +64,10 @@ export async function POST(req: NextRequest) {
         const fourHrsAgo = dayjs(timestamp).subtract(4, 'hours').valueOf()
 
         // Check if user has already submitted a TOD in the last 4 hours
-        // const existingTod = await sql<TodRaw>`SELECT * FROM tods WHERE nation = ${nation} AND created_by = ${session.user.email} AND tod_timestamp >= ${fourHrsAgo}`
-        // if (existingTod.rows.length > 0) {
-        //     return new NextResponse(`You have already submitted a TOD for this nation within the past 4 hours!`, { status: 400 })
-        // }
+        const existingTod = await sql<TodRaw>`SELECT * FROM tods WHERE nation = ${nation} AND created_by = ${session.user.email} AND tod_timestamp >= ${fourHrsAgo}`
+        if (existingTod.rows.length > 0) {
+            return new NextResponse(`You have already submitted a TOD for this nation within the past 4 hours!`, { status: 400 })
+        }
 
         const result = await sql`
             INSERT INTO tods(tod_timestamp, nation, created_by, created_on)
