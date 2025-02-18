@@ -9,7 +9,6 @@ import { Nations, TodRaw } from "./types"
 import { useSession } from "next-auth/react"
 import { useTimeSettings } from "./contexts/time-settings.context"
 import SideMenuItem from "./components/side-menu-item"
-import { time } from "console"
 
 export default function SideMenu() {
     const { data: session } = useSession()

@@ -15,7 +15,7 @@ import windurstIcon from "../../../public/windurst.webp";
 export interface SideMenuItemProps {
     disabled: boolean
     nation: Nations
-    onSave: (nation: Nations, tod: Date) => Promise<void>
+    onSave: (nation: Nations, tod: number) => Promise<void>
 }
 
 
@@ -68,7 +68,7 @@ export default function SideMenuItem({ disabled, nation, onSave }: SideMenuItemP
     return (
         <ListItem
             sx={{ backgroundImage: `linear-gradient(to right, ${color[nation]}, white)` }}
-            secondaryAction={<IconButton disabled={disabled} color="secondary" onClick={() => onSave(nation, currentTime.toDate())}><AddIcon /></IconButton>}
+            secondaryAction={<IconButton disabled={disabled} color="secondary" onClick={() => onSave(nation, currentTime.valueOf())}><AddIcon /></IconButton>}
         >
             <ListItemIcon><Image src={icon[nation]} width={30} height={30} alt={nation} /></ListItemIcon>
             <DateTimePicker
