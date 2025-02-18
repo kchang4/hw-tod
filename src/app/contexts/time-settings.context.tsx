@@ -1,16 +1,23 @@
 "use client"
 
-import { createContext, ReactNode, useContext, useState } from "react"
+import { createContext, ReactNode, useContext, useEffect, useState } from "react"
 
 const TimeSettingsContext = createContext<{ timeFormat: string, changeTimeFormat: (value: "24" | "12") => void } | undefined>(undefined)
 
 const TimeSettingsProvider = ({ children }: { children: ReactNode }) => {
-    const [timeFormat, setTimeFormat] = useState(localStorage.getItem("time_format") || "24")
+    const [timeFormat, setTimeFormat] = useState("24")
 
     const changeTimeFormat = (value: "12" | "24") => {
         localStorage.setItem("time_format", value)
         setTimeFormat(value)
     }
+
+    useEffect(() => {
+        const storedTimeFormat = localStorage.getItem("time_format")
+        if (storedTimeFormat) {
+            setTimeFormat(storedTimeFormat)
+        }
+    }, [])
 
     return (
         <TimeSettingsContext.Provider value={{ timeFormat, changeTimeFormat }}>
