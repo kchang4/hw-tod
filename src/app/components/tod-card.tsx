@@ -1,7 +1,7 @@
 "use client"
 
-import { Badge, Box, Button, ButtonGroup, Chip, debounce, Divider, LinearProgress, List, ListItem, ListItemIcon, ListItemText, Stack, Tooltip, Typography } from "@mui/material"
-import { Nations } from "../types"
+import { Alert, Badge, Box, Button, ButtonGroup, Chip, debounce, Divider, LinearProgress, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Snackbar, Stack, Tooltip, Typography } from "@mui/material"
+import { Nations, TodRaw } from "../types"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import Image from "next/image"
@@ -18,6 +18,8 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess"
 import RefreshIcon from "@mui/icons-material/Refresh"
 import Countdown, { CountdownRenderProps } from "react-countdown"
 import { useTheme } from "@mui/material/styles"
+import ThumbUpIcon from "@mui/icons-material/ThumbUp"
+import { useSession } from "next-auth/react"
 
 
 dayjs.extend(relativeTime)
@@ -41,6 +43,7 @@ export default function TodCard({ nation }: TodBarProps) {
         [Nations.Windurst]: windurstIcon,
     }
 
+    const { data: session } = useSession()
     const { timeFormat } = useTimeSettings()
 
     const TIME_FORMAT = timeFormat === "24" ? "MM/DD/YYYY HH:mm:ss" : "MM/DD/YYYY hh:mm:ss A"
@@ -49,11 +52,47 @@ export default function TodCard({ nation }: TodBarProps) {
     const { data: tods, isLoading: isLoadingTods, mutate: refreshTods } = useTods(nation)
 
     const [viewMore, setViewMore] = useState(false)
+    const [notificationMessage, setNotificationMessage] = useState('')
+    const [saving, setSaving] = useState(false)
+    const [hasError, setHasError] = useState<boolean>(false)
 
     const refresh = debounce(() => {
         refreshTod()
         refreshTods()
     }, 500)
+
+    const saveTod = async (nation: Nations, tod: number) => {
+        setNotificationMessage("")
+        setHasError(false)
+
+        if (!session) {
+            const errorMessage = 'You must be logged in to submit a TOD!'
+            setNotificationMessage(errorMessage)
+            setHasError(true)
+            return
+        }
+
+        const timestamp = dayjs(tod);
+        timestamp.startOf("second")
+
+        try {
+            setSaving(true)
+            const response = await fetch("/api/tod", { method: "POST", body: JSON.stringify({ timestamp: timestamp.valueOf(), nation }) })
+            if (!response.ok) {
+                const message = await response.text()
+                throw new Error(message)
+            }
+            const createdTod = await response.json() as TodRaw
+            setNotificationMessage(`${dayjs(createdTod.tod_timestamp).format(TIME_FORMAT)} submitted for ${nation}!`)
+        } catch (err) {
+            if (err instanceof Error) {
+                setHasError(true)
+                setNotificationMessage(err.message)
+            }
+        } finally {
+            setSaving(false)
+        }
+    }
 
     const renderCountdown = ({ hours, minutes, seconds, completed }: CountdownRenderProps) => {
         const hourSplit = hours.toString().split("")
@@ -125,7 +164,11 @@ export default function TodCard({ nation }: TodBarProps) {
                             const todInt = parseInt(tod.tod_timestamp)
                             const popTime = <Typography variant="subtitle1">POP: {dayjs(todInt).add(4, "hours").format(TIME_FORMAT)}</Typography>
                             const todTime = <Typography sx={{ color: "rgba(0, 0, 0, .5)" }} variant="subtitle2">TOD: {dayjs(todInt).format(TIME_FORMAT)}</Typography>
-                            const secondaryAction = <ListItemIcon><Tooltip title="Number of Reports"><Badge badgeContent={tod.tod_count} color="primary"></Badge></Tooltip></ListItemIcon>
+                            const secondaryAction =
+                                <Stack direction="row" spacing={1} alignItems="center" justifyContent="center">
+                                    <ListItemIcon><Tooltip title="Number of Reports"><Badge badgeContent={tod.tod_count} color="primary"></Badge></Tooltip></ListItemIcon>
+                                    <ListItemButton disabled={saving || !session} title="Increase the visibility of this TOD" onClick={() => saveTod(tod.nation, parseInt(tod.tod_timestamp))}><ThumbUpIcon color="secondary" /></ListItemButton>
+                                </Stack>
                             return (
                                 <Box key={`${nation}${index}${tod.tod_timestamp}`}>
                                     <ListItem key={tod.tod_timestamp} secondaryAction={secondaryAction}>
@@ -138,6 +181,14 @@ export default function TodCard({ nation }: TodBarProps) {
                     </List>
                 </Box>
             )}
+            <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={!!notificationMessage.length}
+                autoHideDuration={3000}
+                onClose={() => setNotificationMessage('')}
+            >
+                <Alert severity={hasError ? "error" : "success"}>{notificationMessage}</Alert>
+            </Snackbar>
         </Box >
     )
 }
