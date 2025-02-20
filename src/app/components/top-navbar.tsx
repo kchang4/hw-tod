@@ -1,6 +1,6 @@
 "use client"
 
-import { AppBar, Box, FormControlLabel, IconButton, Menu, MenuItem, Switch, Toolbar } from "@mui/material"
+import { AppBar, Box, Button, FormControlLabel, IconButton, Menu, MenuItem, Switch, Toolbar } from "@mui/material"
 import AccountCircle from "@mui/icons-material/AccountCircle"
 import { signOut, useSession } from "next-auth/react"
 import LoginButton from "./login-button"
@@ -25,6 +25,11 @@ export default function TopNavBar() {
         setClockFormat(value)
     }
 
+    const crawl = async () => {
+        const response = await fetch("/api/crawl", { method: "GET"})
+        console.log(response.body)
+    }
+
     return (
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static">
@@ -33,6 +38,7 @@ export default function TopNavBar() {
                     <Box flexGrow={1}></Box>
                     {session?.user?.email && <IconButton>{session?.user?.image ? <Image onClick={handleMenu} height={30} width={30} src={session.user.image} alt={session.user.name || ""} /> : <AccountCircle />}</IconButton>}
                     {!session && <LoginButton />}
+                    {session?.user && <Button onClick={() => crawl()}>Click Me</Button>}
                 </Toolbar>
             </AppBar>
             <Menu anchorEl={anchorEl} id="user-profile-menu" open={!!anchorEl} onClose={() => setAnchorEl(null)} keepMounted>
