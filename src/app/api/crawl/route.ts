@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import puppeteer from "puppeteer"
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
     const browser = await puppeteer.launch()
     const page = await browser.newPage()
 
@@ -13,5 +13,5 @@ export async function GET(req: NextRequest) {
     // find the list of yells
     const elemHandle = await page.locator('.yell-tell').waitHandle()
     const text = elemHandle.evaluate(el => el.textContent)
-    console.log(text)
+    return NextResponse.json(text)
 }
