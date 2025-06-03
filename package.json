@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": "22.14.0",
-    "npm": "10.9.2"
+    "node": "v24.1.0",
+    "npm": "11.3.0"
   },
   "scripts": {
     "dev": "next dev --turbopack",
@@ -13,34 +13,34 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@emotion/cache": "^11.14.0",
-    "@emotion/react": "^11.14.0",
-    "@emotion/server": "^11.11.0",
-    "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^6.4.1",
-    "@mui/material": "^6.4.1",
-    "@mui/material-nextjs": "^6.3.1",
-    "@mui/x-charts": "^7.24.1",
-    "@mui/x-data-grid": "^7.24.1",
-    "@mui/x-date-pickers": "^7.24.1",
-    "@vercel/postgres": "^0.10.0",
-    "dayjs": "^1.11.13",
-    "next": "^15.1.6",
+    "@emotion/cache": "11.14.0",
+    "@emotion/react": "11.14.0",
+    "@emotion/server": "11.11.0",
+    "@emotion/styled": "11.14.0",
+    "@mui/icons-material": "7.1.1",
+    "@mui/material": "7.1.1",
+    "@mui/material-nextjs": "7.1.1",
+    "@mui/x-charts": "8.5.0",
+    "@mui/x-data-grid": "8.5.0",
+    "@mui/x-date-pickers": "8.5.0",
+    "@vercel/postgres": "0.10.0",
+    "dayjs": "1.11.13",
+    "next": "15.3.3",
     "next-auth": "beta",
-    "puppeteer": "^24.2.1",
-    "react": "^19.0.0",
-    "react-countdown": "^2.3.6",
-    "react-dom": "^19.0.0",
-    "swr": "^2.3.0"
+    "puppeteer": "24.10.0",
+    "react": "19.1.0",
+    "react-countdown": "2.3.6",
+    "react-dom": "19.1.0",
+    "swr": "2.3.3"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.2.0",
-    "@types/node": "^22.10.10",
-    "@types/react": "^19.0.8",
-    "@types/react-dom": "^19.0.3",
-    "eslint": "^9.19.0",
-    "eslint-config-next": "^15.1.6",
-    "eslint-config-prettier": "^10.0.1",
-    "typescript": "^5.7.3"
+    "@eslint/eslintrc": "3.3.1",
+    "@types/node": "22.15.29",
+    "@types/react": "19.1.6",
+    "@types/react-dom": "19.1.5",
+    "eslint": "9.28.0",
+    "eslint-config-next": "15.3.3",
+    "eslint-config-prettier": "10.1.5",
+    "typescript": "5.8.3"
   }
 }
