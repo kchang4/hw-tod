@@ -1,12 +1,15 @@
 "use client"
 
-import { Box, List, ListItem, ListItemText } from "@mui/material"
+import { Box, Divider, List, ListItem, ListItemText } from "@mui/material"
 import { Nations } from "./types";
 import { useYells } from "./hooks/useYells";
 import dayjs from "dayjs";
 import { useTimeSettings } from "./contexts/time-settings.context";
 import { useEffect, useState } from "react";
 import theme from "./theme";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
 
 export interface HWYellListProps {
     nation?: Nations;
@@ -28,18 +31,23 @@ export default function HWYellList({ nation }: HWYellListProps) {
                 <div>Loading...</div>
             ) : (
                 <List>
-                    {yells.data.map((yell) => (
-                        <ListItem key={yell.id}>
-                            <ListItemText>
-                                <strong>[{dayjs(parseInt(yell.timestamp, 10)).format(time)}]</strong>{" "}
-                                <span style={{ backgroundColor: theme.palette.primary.main, color: "white", padding: "5px" }}>{yell.player}</span>{" "}
-                                {" "}
-                                {yell.text}
-                            </ListItemText>
-                        </ListItem>
+                    {yells.data.map((yell, index) => (
+                        <>
+                            <ListItem key={yell.id}>
+                                <ListItemText>
+                                    <strong>[{dayjs(parseInt(yell.timestamp, 10)).format(time)}]</strong>{" "}
+                                    <strong>[{dayjs(parseInt(yell.timestamp, 10)).fromNow()}]</strong>{" "}
+                                    <span style={{ backgroundColor: theme.palette.primary.main, color: "white", padding: "5px" }}>{yell.player}</span>{" "}
+                                    {" "}
+                                    {yell.text}
+                                </ListItemText>
+                            </ListItem>
+                            {index < yells.data.length - 1 && <Divider variant="middle" />}
+                        </>
                     ))}
                 </List>
-            )}
-        </Box>
+            )
+            }
+        </Box >
     )
 }
