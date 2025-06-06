@@ -1,10 +1,12 @@
 "use client"
 
-import { Box } from "@mui/material"
+import { Box, List, ListItem, ListItemText } from "@mui/material"
 import { Nations } from "./types";
 import { useYells } from "./hooks/useYells";
 import dayjs from "dayjs";
 import { useTimeSettings } from "./contexts/time-settings.context";
+import { useEffect, useState } from "react";
+import theme from "./theme";
 
 export interface HWYellListProps {
     nation?: Nations;
@@ -14,20 +16,29 @@ export default function HWYellList({ nation }: HWYellListProps) {
     const yells = useYells(nation ?? "", 10, 0, "desc");
     const { timeFormat } = useTimeSettings()
 
-    const TIME_FORMAT = timeFormat === "24" ? "MM/DD/YYYY HH:mm:ss" : "MM/DD/YYYY hh:mm:ss A"
+    const [time, setTime] = useState(timeFormat === "24" ? "MM/DD/YYYY HH:mm:ss" : "MM/DD/YYYY hh:mm:ss A")
+
+    useEffect(() => {
+        setTime(timeFormat === "24" ? "MM/DD/YYYY HH:mm:ss" : "MM/DD/YYYY hh:mm:ss A")
+    }, [timeFormat])
 
     return (
         <Box sx={(theme) => ({ padding: theme.spacing(2) })}>
             {yells.isLoading ? (
                 <div>Loading...</div>
             ) : (
-                <ul>
+                <List>
                     {yells.data.map((yell) => (
-                        <li key={yell.id}>
-                            <strong>[{dayjs(parseInt(yell.timestamp, 10)).format(TIME_FORMAT)}]</strong> {yell.player}: {yell.text}
-                        </li>
+                        <ListItem key={yell.id}>
+                            <ListItemText>
+                                <strong>[{dayjs(parseInt(yell.timestamp, 10)).format(time)}]</strong>{" "}
+                                <span style={{ backgroundColor: theme.palette.primary.main, color: "white", padding: "5px" }}>{yell.player}</span>{" "}
+                                {" "}
+                                {yell.text}
+                            </ListItemText>
+                        </ListItem>
                     ))}
-                </ul>
+                </List>
             )}
         </Box>
     )
