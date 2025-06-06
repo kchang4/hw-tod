@@ -3,6 +3,7 @@ import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter"
 import { ThemeProvider } from "@mui/material"
 import { Roboto } from "next/font/google"
 import theme from "./theme"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 
 export const metadata: Metadata = {
@@ -25,6 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en" style={{ height: '100%', width: '100%' }}>
       <body className={roboto.variable} style={{ margin: 0, padding: 0, height: '100%', width: '100%' }}>
+        <SpeedInsights />
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
             {children}
