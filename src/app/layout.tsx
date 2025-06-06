@@ -26,10 +26,10 @@ export default function RootLayout({
   return (
     <html lang="en" style={{ height: '100%', width: '100%' }}>
       <body className={roboto.variable} style={{ margin: 0, padding: 0, height: '100%', width: '100%' }}>
-        <SpeedInsights />
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
             {children}
+            <SpeedInsights />
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>
