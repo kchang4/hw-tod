@@ -31,18 +31,17 @@ export default function HWYellList({ nation }: HWYellListProps) {
                 <div>Loading...</div>
             ) : (
                 <List>
-                    {yells.data.map((yell, index) => (
+                    {yells.data.map((yell) => (
                         <>
                             <ListItem key={yell.id}>
                                 <ListItemText>
-                                    <strong>[{dayjs(parseInt(yell.timestamp, 10)).format(time)}]</strong>{" "}
-                                    <strong>[{dayjs(parseInt(yell.timestamp, 10)).fromNow()}]</strong>{" "}
-                                    <span style={{ backgroundColor: theme.palette.primary.main, color: "white", padding: "5px" }}>{yell.player}</span>{" "}
-                                    {" "}
-                                    {yell.text}
+                                    <span style={{ opacity: "50%" }}>[{dayjs(parseInt(yell.timestamp, 10)).format(time)}]</span>{" "}
+                                    <span>[{dayjs(parseInt(yell.timestamp, 10)).fromNow()}]</span>{" "}
+                                    <span style={{ color: theme.palette.secondary.main, fontWeight: "bolder" }}>{yell.text}</span>
+                                    <Divider variant="fullWidth" />
+                                    <span style={{ color: theme.palette.primary.main, padding: "3px", fontSize: "90%" }}>{yell.player}</span>
                                 </ListItemText>
                             </ListItem>
-                            {index < yells.data.length - 1 && <Divider variant="middle" />}
                         </>
                     ))}
                 </List>
