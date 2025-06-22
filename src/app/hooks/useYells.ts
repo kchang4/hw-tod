@@ -1,6 +1,13 @@
 import useSWR from "swr"
 import { Nations } from "../types"
 
+export type YellQueryParams = {
+    nation?: Nations,
+    limit?: number,
+    skip?: number,
+    sort?: "asc" | "desc",
+}
+
 export type YellResult = {
     id: string,
     player: string,
@@ -9,19 +16,28 @@ export type YellResult = {
     nation: string,
 }
 
-export function useYells(nation: Nations | "", limit?: number, skip?: number, sort?: "asc" | "desc") {
-    const params = new URLSearchParams();
-    if (nation) params.append("nation", nation);
-    if (limit !== undefined) params.append("limit", limit.toString());
-    if (skip !== undefined) params.append("skip", skip.toString());
-    if (sort) params.append("sort", sort);
+export function useYells(queryParams: YellQueryParams) {
+    const params = new URLSearchParams()
+    if (queryParams.nation) params.append("nation", queryParams.nation)
+    if (queryParams.limit !== undefined) params.append("limit", queryParams.limit.toString())
+    if (queryParams.skip !== undefined) params.append("skip", queryParams.skip.toString())
+    if (queryParams.sort) params.append("sort", queryParams.sort)
 
-    const { data, error, mutate, isLoading } = useSWR<YellResult[]>(`/api/yell?${params.toString()}`, (url: string) => fetch(url, { method: "GET" }).then((res) => res.json()), { refreshInterval: 3000 });
+    // polls data every 10 seconds
+    // you can adjust the refreshInterval as needed
+    const { data, error, mutate, isLoading } = useSWR<YellResult[]>(
+        `/api/yell`,
+        async (url: string) => {
+            // only grab yells from the last 8 hours
+            params.set("timestamp_gte", (Date.now() - 8 * 60 * 60 * 1000).toString());
+            const response = await fetch(`${url}?${params.toString()}`, { method: "GET" });
+            return response.json();
+        }, { refreshInterval: 5000 })
 
     return {
         data: data || [],
         error,
         mutate,
         isLoading,
-    };
+    }
 }

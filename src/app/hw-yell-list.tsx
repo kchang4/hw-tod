@@ -16,7 +16,7 @@ export interface HWYellListProps {
 }
 
 export default function HWYellList({ nation }: HWYellListProps) {
-    const yells = useYells(nation ?? "", 50, 0, "desc");
+    const yells = useYells({ nation })
     const { timeFormat } = useTimeSettings()
 
     const [time, setTime] = useState(timeFormat === "24" ? "MM/DD/YYYY HH:mm:ss" : "MM/DD/YYYY hh:mm:ss A")

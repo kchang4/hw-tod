@@ -4,6 +4,7 @@ import { ThemeProvider } from "@mui/material"
 import { Roboto } from "next/font/google"
 import theme from "./theme"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/next"
 
 
 export const metadata: Metadata = {
@@ -30,6 +31,7 @@ export default function RootLayout({
           <ThemeProvider theme={theme}>
             {children}
             <SpeedInsights />
+            <Analytics />
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>
